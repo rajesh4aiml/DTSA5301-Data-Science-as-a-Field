@@ -6,4 +6,4 @@ Please share your comments if you like this project.
 References
 - [University of Colorado, Boulder - DTSA-530](https://www.coursera.org/learn/data-science-as-a-field)
 - [CSSE Johns Hopkins University](https://github.com/CSSEGISandData/COVID-19/blob/master/README.md)
-- [Coursera, CU Boulder](https://www.coursera.org/specializations/data-science-r-programming-tidyverse)
+- [Coursera, CU Boulder - Expressway to Data Science: R Programming and Tidyverse Specialization](https://www.coursera.org/specializations/data-science-r-programming-tidyverse)
