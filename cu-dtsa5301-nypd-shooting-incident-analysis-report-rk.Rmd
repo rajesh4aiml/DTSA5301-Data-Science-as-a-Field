@@ -20,7 +20,7 @@ options(warn=-1)
 ```
 
 # Executive Summary 
-Gun violence has been one of the most sensitive and debated topics in USA for years and it has been used by politicians in every election for their own gains. In this report, we will keep our biases aside and try to look at the facts by analyzing the real cases that are available to us from the [catalog.data.gov](https://catalog.data.gov/dataset/nypd-shooting-incident-data-historic) website.
+This project is to analyze the **NYPD Shooting Incident data** and explore the nature of the criminal activity in NYC from 2006 to 2020. Gun violence has been one of the most sensitive and debated topics in USA for years and it has been used by politicians in every election for their own gains. In this report, we will keep our biases aside and try to look at the facts by analyzing the real cases that are available to us from the **[catalog.data.gov](https://catalog.data.gov/dataset/nypd-shooting-incident-data-historic)** website. We will also build a **Quantitative model** to predict the shooting incidents of future. 
 
 - We will follow a step by step and iterative Data Science process to analyze and generate insights.
   
