@@ -6,7 +6,8 @@ output: pdf_document
 ---
 
 ##### **Important Note**
-- **Libraries Required**: Please plan to install the libraries **(ltidyverse, llubridate, lusmap, lstringr)**
+- **Libraries Required**: Please check session info in the end and confirm if you installed the libraries needed for this project. Important libraries: **(tidyverse, lubridate, usmap, stringr)**.
+- **File Downloads**: If you happen to run into data file download issues due to network issues, please retry, if not please manually download the file and save it to folder: cached_data under your current directory.
 - **PDF Document**: A PDF version of this report is available in [GitHub](https://github.com/rajesh4aiml/DTSA5301-Data-Science-as-a-Field).
 
 
@@ -1157,7 +1158,18 @@ csse_us_cases_deaths_basic_pred_vz
 
 -----------------------------------
 
-##### **Section 6: Conclusion**
+##### **Section 6: Biases**
+- Professor Jane Wall rightly mentioned that Biases are natural. Everyone falls into their trap.
+- **Emotional Biases**: COVID-19 itself was emotionally intense. There were many families across the world who lost a loved one or a friend. We want to be very careful in presenting our analysis. Our objective is to prepare a report that will help the right agencies to control the situation, hence we should not express our emotions in our reporting. 
+- **Data is gold**:  We want to always trust data and use data to make inferences. Doing so we will earn trust.
+- **Confirmation biases**: We are familiar with COVID019. Thus, we can make mistakes if we become overconfident. Our analysis should be purely based on facts in the data.
+- **Selection biases**: Quality of information - Who and how the data was collected? Several countries were blamed for not reporting the information on time, several Government officials were fired since they failed to report important info. From all this historic info, we can be certain that Selection bias existed during the data collection process. We received this data from a trusted source, but the origin had some selection bias.
+- **Anchoring biases**: We react to the first piece of information.
+
+
+-----------------------------------
+
+##### **Section 7A: Conclusion**
 - In this project, we followed the Iterative steps in the Data Science process (DTSA-530) and analyzed the different countries and reported observations for the top 3 countries. 
 - For the countries, we narrowed our analysis to a small window (2020-03-15 and 2021-12-31) to understand the details during the peak pandemic period. 
 - We looked at US states and reported observations for the top 3 states followed by sharing the cases and deaths in one of the favorite states **(`r ANA_FAV_STATE`)**. For the top 3 USA states, from March 2022, we noticed a plateau in the graph for deaths per 100k.
@@ -1167,4 +1179,10 @@ csse_us_cases_deaths_basic_pred_vz
 - Furthermore, if we had the demographic data, the facilities data, and other local data, we could have done much better analysis to generate insights that could help key stakeholders.
 
 
+###### **Section 7B: ** Session Information
+- This will help the reader to understand the packages used.
+```{r sessioninfo}
+sessionInfo()
+```
 
+ 
