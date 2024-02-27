@@ -1,12 +1,13 @@
 ---
 title: "CU-DTSA-530 - NYPD Shooting Incident Report"
 author: "Rajesh Kutti, Student - University of Colorado, Boulder"
-date: "2024-02-24"
+date: "2024-02-27"
 output: pdf_document
 ---
 
 ##### **Important Note**
 - **Libraries Required**: Please plan to install the libraries **(ltidyverse, llubridate, lusmap, lstringr)**
+- **File Downloads**: If you happen to run into data file download issues due to network issues, please retry, if not please manually download the file and save it to folder: cached_data under your current directory.
 - **PDF Document**: A PDF version of this report is available in [GitHub](https://github.com/rajesh4aiml/DTSA5301-Data-Science-as-a-Field).
 
 ```{r setup, include=FALSE}
@@ -20,11 +21,11 @@ options(warn=-1)
 ```
 
 # Executive Summary 
-This project is to analyze the **NYPD Shooting Incident data** and explore the nature of the criminal activity in NYC from 2006 to 2020. Gun violence has been one of the most sensitive and debated topics in USA for years and it has been used by politicians in every election for their own gains. In this report, we will keep our biases aside and try to look at the facts by analyzing the real cases that are available to us from the **[catalog.data.gov](https://catalog.data.gov/dataset/nypd-shooting-incident-data-historic)** website. We will also build a **Quantitative model** to predict the shooting incidents of future. 
+This project is to analyze the **NYPD Shooting Incident data** and explore the nature of the criminal activity in NYC from 2006 to 2022. Gun violence has been one of the most sensitive and debated topics in USA for years since there are differences in opinion between people - sometimes even in the same household. Our goal is to help reduce crime in NYC, so for analyzing and preparing this report, we will be mindful, and we will keep our biases aside and try to look at the real facts in the shooting incident data presented to us by the **[catalog.data.gov](https://catalog.data.gov/dataset/nypd-shooting-incident-data-historic)** website. We will also build a **Quantitative machine learning model** to predict the future shooting incidents which could hopefully help the NYPD.  
 
 - We will follow a step by step and iterative Data Science process to analyze and generate insights.
   
-- **Goal** - Analyze and build a Quantitative model to predict Gun violence in NYC. 
+- **Goal** - Analyze, share insights, provide actionable plan to reduce crime in NYC and build a Quantitative model to predict gun violence in NYC Boro's. 
 - **Benefits** - By exploring the nature of shooting/criminal activity, we can help the Law Enforcement Agencies to minimize crime. We can help the public to stay informed and We can help to Government to create a safe neighborhood. 
 - **Objectives** - To achieve our goal, we must continue to ask questions (as follows) to gain more insights into the problem until all our objectives are met.
   + How many incidents are happening across New York City? 
@@ -34,7 +35,7 @@ This project is to analyze the **NYPD Shooting Incident data** and explore the n
 	  + What is their race, age group and gender? 	
 	+ Can we understand the demographics of the victims?
 	  + What is their race, age group and gender?	
-  + Can we narrow down into the top 2 precinct and get some insights?
+  + Can we narrow down into the top 5 precinct and get some insights?
 - Finally, we want to train and test a predictive model to predict future shooting incidents to help law enforcement.
 - For those who want a summarized view of this report, please start from **[Section 3: Visualizations](#Section 3: Visualizations)**. The observations and insights are articulated in that section. 
   
@@ -174,6 +175,9 @@ DOWNLOAD_URL <- "https://data.cityofnewyork.us/api/views/833y-fsy8/rows.csv?acce
 LOCAL_FILE = "cached_data/NYPD_Shooting_Incident_Data__Historic_.csv"
 if (!file.exists("cached_data")) {
   dir.create("cached_data")
+}
+
+if (!file.exists(LOCAL_FILE)) {
   print(str_c("Please wait .. Downloading the data from :", DOWNLOAD_URL))
   download.file(DOWNLOAD_URL, destfile=LOCAL_FILE)
 }
@@ -299,6 +303,7 @@ nyc_incidents_ts_vz <- nyc_dataset_df1 %>%
     plot.subtitle = element_text(hjust = 0.97),
     axis.text.x = element_text(angle = 45, hjust = 1)
   ) + 
+  xlab("Shooting incidents per year") + ylab("Incident count") +
   labs(
     title = str_c("Shooting incidents in NYC Boros. Total incidents:", total_no_of_incidents)
   )
@@ -341,7 +346,9 @@ nyc_incidents_by_loc_vz <- nyc_incidents_by_loc_df  %>%
   ggplot(aes(x="", y=inc_ct, fill=LOCATION_DESC)) + 
   geom_bar(stat="identity", width=1)  + 
   coord_polar("y", start=0) + 
-  xlab("") + ylab("") + ggtitle(str_c("S-Inc by Location. Total incidents:", total_no_of_incidents)) +
+  xlab("") + ylab("") + 
+  theme_light() +
+  ggtitle(str_c("S-Inc by Location. Total incidents:", total_no_of_incidents)) +
   theme(legend.direction="vertical")
 
 
@@ -370,7 +377,9 @@ nyc_incidents_by_week_hour_vz <- nyc_incidents_by_week_hour_df %>%
   geom_bar(stat="identity") + 
   scale_fill_manual(values=c("tomato" ,"lightcyan", "lightsteelblue", "khaki1", "gray49", "snow2")) +
   #scale_fill_viridis_c(option="H") +
-  xlab("") + ylab("") + ggtitle(str_c("S-Inc by Week and hour. Total incidents:", total_no_of_incidents)) +
+  theme_light() +
+  xlab("Weekday, hour") + ylab("Incident count") + 
+  ggtitle(str_c("S-Inc by week and hour. Total incidents:", total_no_of_incidents)) +
   theme_classic()
 
 ```
@@ -424,6 +433,7 @@ nyc_dataset_byfatal_vz <- nyc_dataset_byfatal_df %>%
     plot.subtitle = element_text(hjust = 0.97),
     axis.text.x = element_text(angle = 45, hjust = 1)
   ) + 
+  xlab("STATISTICAL_MURDER_FLAG") + ylab("Incident count") + 
   labs(
     title = str_c("S-Inc by Fatal flag. Total incidents:", total_no_of_incidents)
   ) + 
@@ -469,6 +479,7 @@ nyc_incidents_by_perp_age_group_ts_vz <- nyc_incidents_by_perp_age_group_df %>%
     plot.subtitle = element_text(hjust = 0.97),
     axis.text.x = element_text(angle = 45, hjust = 1)
   ) + 
+  xlab("Year and age group") + ylab("Incident Count") +
   labs(
     title = str_c("S-Inc by Perpetrator age group. Total incidents:", total_no_of_incidents)
   )
@@ -510,6 +521,7 @@ nyc_incidents_by_vic_age_group_ts_vz <- nyc_incidents_by_vic_age_group_df %>%
     plot.subtitle = element_text(hjust = 0.97),
     axis.text.x = element_text(angle = 45, hjust = 1)
   ) + 
+  xlab("Year and age group") + ylab("Incident Count") +
   labs(
     title = str_c("S-Inc by Victims age group. Total incidents:", total_no_of_incidents)
   )
@@ -557,6 +569,7 @@ nyc_incidents_by_perp_age_group_race_ts_vz <- nyc_incidents_by_perp_age_group_ra
     plot.subtitle = element_text(hjust = 0.97),
     axis.text.x = element_text(angle = 45, hjust = 1)
   ) + 
+  xlab("Perpetrator age group and race") + ylab("Incident Count") +
   labs(
     title = str_c("S-Inc by Perpetrator age group and race. \nTotal incidents:", total_no_of_incidents)
   )
@@ -597,6 +610,7 @@ nyc_incidents_by_vic_age_group_race_ts_vz <- nyc_incidents_by_vic_age_group_race
     plot.subtitle = element_text(hjust = 0.97),
     axis.text.x = element_text(angle = 45, hjust = 1)
   ) + 
+  xlab("Victims age group and race") + ylab("Incident Count") +
   labs(
     title = str_c("S-Inc by Victims age group and race. \nTotal incidents:", total_no_of_incidents)
   )
@@ -643,6 +657,7 @@ nyc_incidents_by_perp_sex_ts_vz <- nyc_dataset_by_sex_df %>%
     plot.subtitle = element_text(hjust = 0.97),
     axis.text.x = element_text(angle = 45, hjust = 1)
   ) + 
+  xlab("Perpetrators gender") + ylab("Incident Count") +
   labs(
     title = str_c("S-Inc by Perpetrator sex: Total incidents:", total_no_of_incidents)
   )
@@ -681,6 +696,7 @@ nyc_incidents_by_vic_sex_ts_vz <- nyc_dataset_by_vic_sex_df %>%
     plot.subtitle = element_text(hjust = 0.97),
     axis.text.x = element_text(angle = 45, hjust = 1)
   ) + 
+  xlab("Victims gender") + ylab("Incident Count") +
   labs(
     title = str_c("S-Inc by Victims sex: Total incidents:", total_no_of_incidents)
   )
@@ -690,6 +706,88 @@ nyc_incidents_by_vic_sex_ts_vz <- nyc_dataset_by_vic_sex_df %>%
 
 ###### Analyze and prepare stats for **Precinct** for Visualization
 ```{r az-graphs-precinct, message=FALSE}
+
+
+# ----------------- NYC incidents for Top N Precincts
+# Group by Boro and precinct
+nyc_top_n_precinct_df <- nyc_dataset_df %>% 
+  group_by(BORO, PRECINCT) %>% summarize(ct = n()) %>%
+  ungroup()
+  
+# Group by Boro and arrange/sort by ct and fetch the TOP 5 per Boro 
+nyc_top_n_precinct_df <- nyc_top_n_precinct_df %>%
+  group_by(BORO) %>%
+  arrange(desc(ct)) %>%
+  slice(1:5)
+
+# Group by Boro and get the sum of incidents
+nyc_top_n_precinct_df2 <- nyc_top_n_precinct_df %>% 
+  group_by(BORO) %>% 
+  summarise(tot=sum(ct))
+
+# Join with precinct and get the labels
+nyc_top_n_precinct_df <- nyc_top_n_precinct_df %>%
+  full_join(nyc_top_n_precinct_df2) %>%
+  mutate(boro_pct = paste0(BORO, '\n', formatNumber(tot)))
+
+# Get the total for the precinct for displaying in the label.
+nyc_top_n_precinct_total <- (nyc_top_n_precinct_df2 %>% summarise(s = sum(tot)))$s
+
+# Get the precent for the precinct for displaying in the label.
+nyc_top_n_precinct_pct <- round(100 * (nyc_top_n_precinct_total/total_no_of_incidents_fl),2)
+
+# label for graph
+lbl_prec <- str_c("S-Inc Top 5 precincts by each Boro: \nIncidents", formatNumber(nyc_top_n_precinct_total), " of ", formatNumber(total_no_of_incidents), " (", nyc_top_n_precinct_pct, "%)")
+
+# Prepare he graph for Top 5 precinct
+nyc_top_n_precinct_vz <- nyc_top_n_precinct_df %>%
+  ggplot(aes(x=PRECINCT, y=ct, fill=BORO)) +
+  geom_bar(stat='identity', aes(fill=BORO), alpha=0.8, width = 0.4) +
+  geom_text(aes(label=ct), color="navy", vjust=-0.08,
+            position = position_dodge(0.9), size=3)+
+  theme_light() +
+  theme(
+    legend.position="top",
+    strip.background = element_rect(fill = "peachpuff"),
+    strip.text = element_text(colour = "navy", size = rel(1.0)),
+    plot.title = element_text(hjust = 0.5),
+    plot.subtitle = element_text(hjust = 0.97),
+    axis.text.x = element_text(angle = 0, hjust = 1)
+  ) + 
+  xlab("Top 5 Precincts per Boro") + ylab("Incident Count") +
+  labs(
+    title = lbl_prec
+  )
+
+
+# ----------------- NYC incidents for Top 5 Precinct - Timeseries data
+# Prepare the timeseries data
+nyc_top_n_precinct_ts_df <- nyc_dataset_df %>% 
+  filter(PRECINCT %in% nyc_top_n_precinct_df$PRECINCT) %>%
+  group_by(syear, BORO) %>%
+  summarise(inc_ct = n())
+
+# Prepare the timeseries graph for Top5 precincts
+nyc_top_n_precinct_ts_vz <- nyc_top_n_precinct_ts_df %>%
+  ggplot(aes(x=syear, y=inc_ct, fill=BORO)) +
+  geom_text(aes(label=inc_ct), color="navy", vjust=-0.08, position = position_dodge(0.9), size=2)+
+  geom_line(aes(x=syear, y=inc_ct, color=BORO), stat="identity", size=1.2) +
+  theme_light() +
+  theme(
+    legend.position="top",
+    strip.background = element_rect(fill = "peachpuff"),
+    strip.text = element_text(colour = "navy", size = rel(1.0)),
+    plot.title = element_text(hjust = 0.5),
+    plot.subtitle = element_text(hjust = 0.97),
+    axis.text.x = element_text(angle = 0, hjust = 1)
+  ) + 
+  xlab("Incident Year") + ylab("Incident Count") +
+  scale_x_continuous(n.breaks = 12) +
+  labs(
+    title = str_c("S-Inc Top 5 precincts by each Boro: \nIncidents", formatNumber(nyc_top_n_precinct_total), " of ", formatNumber(total_no_of_incidents),
+                  " (", nyc_top_n_precinct_pct, "%)")
+  )
+
 
 # ----------------- NYC incidents for Brooklyn Precinct
 # Create dataset for Brooklyn precinct, aggregating by PRECINCT
@@ -869,13 +967,30 @@ nyc_incidents_by_vic_sex_ts_vz
 
 ----------------------------------------------
 
-##### **Section 3F: Closer look**: Shooting Incidents in **Brooklyn, New York City**
-- **Which precinct in Brooklyn had the most incidents? What could be the reasons?**
-  * There are few precincts that need more attention from Law Enforcement
-  * With limited data we cannot do the root cause analysis for the shootings in this location.
-  * Government needs to understand the cause of shooting in these precincts.
+##### **Section 3F: Top 5 precincts**: Boro wise shooting incidents.
+
+- **Which are the top 5 precincts(with the most incidents) in each NYC Boro?**
+  * Approx 60 % of the incidents happened in these Precincts.
   
 ```{r vz-nyc-inc-precinct-1, message=FALSE, echo=FALSE}
+nyc_top_n_precinct_vz
+```
+
+- **Display the yearly trends for the top 5 precincts(with the most incidents) in each NYC Boro?**
+  * Clearly, these are **low hanging fruits** for NYPD. If they partner with other Government and Health Agencies, they can reduce the crime by more than 60%.
+  
+```{r vz-nyc-inc-precinct-2, message=FALSE, echo=FALSE}
+nyc_top_n_precinct_ts_vz
+```
+
+
+##### **Section 3G: Closer look**: Shooting Incidents in **Brooklyn, New York City**
+- **Which precinct in Brooklyn had the most incidents? What could be the reasons?**
+  * There were a few precincts that need more attention from Law Enforcement
+  * With limited data we cannot do the root cause analysis for the shootings in this location.
+  * **Government needs to partner with other agencies to reduce crime in these precincts**.
+  
+```{r vz-nyc-inc-precinct-3, message=FALSE, echo=FALSE}
 nyc_dataset_brooklyn_vz
 ```
 
@@ -953,8 +1068,15 @@ While looking at the initial data I might have some implicit bias such as stereo
 
 A **stereotype** is a generalized belief about a particular category of people. It is an expectation that people might have about every person of a particular group. The type of expectation can vary; it can be, for example, an expectation about the group's personality, preferences, appearance or ability. Stereotypes are sometimes overgeneralized, inaccurate, and resistant to new information, but can sometimes be accurate.
 
+There are other biases that could be introduced while working on this case study:
+  - Emotional bias:  due to the nature of crime
+  - Selection bias: Who and how the data was collected.
+  - Anchoring bias: We react to the first piece of information.
+  - Confirmation bias: We might think we are experts.
+  - Salience - Focusing on the simple things to get work done.
+
 **Biases - How to overcome**:
-To overcome implicit biases, we need to thoroughly analyze the data and our report must be based on facts in the data and not based on our emotions and biases.
+To overcome implicit biases, we need to follow a disciplined and mindful approach of thoroughly analyzing the data, drawing inferences, asking questions, collecting more data and validating our assumptions using some quantitative models. Our report must be based on facts in the data and not based on our emotions and biases.
 
 ----------------------------------------------
 
@@ -965,9 +1087,13 @@ To overcome implicit biases, we need to thoroughly analyze the data and our repo
   * Between **2005** and **2020**, there were **`r total_no_of_incidents`** shooting incidents in the **five** Boro's and **Brooklyn 40%** and **Bronx** were the areas with most crimes. **Approx. 17% to 20%** of the incidents resulted in a murder. We also noticed that the incident was concentrated in few Precincts within these Boro's.  
   * The incidents mostly occurred in the multi-dwell, apt, grocery, bar/night club, and commercial buildings during the night and the midnight hours and mostly men were involved in crime.
   * The race, sex and age-group of most of the perpetrators were - Black Male between **ages 18 to 44** years. The race, sex and age-group of most of the victims were - Black and Black Hispanic and white Hispanic male between **ages 18 to 44** years. 
-  * The top 10 precincts in Brooklyn resulted in a crime rate of **`r bk_top10_global_pct`** of the NYC shootings. These precincts : **`r top10_precinct`** had total **`r formatNumber(bk_top10_share)`** shooting incidents and hence they really need attention. Crime rate can be cut into more than 1/2 if we can help these precincts.
+  * The top 5 precincts in each Boro accounted for 60% of the incidents.
+  * The top 10 precincts in Brooklyn resulted in a crime rate of **`r bk_top10_global_pct`** of the NYC shootings. These precincts: **`r top10_precinct`** had total **`r formatNumber(bk_top10_share)`** shooting incidents and hence they really need attention. 
 - We built a model to predict the shootings in each Boro for the future. We noticed that our model is good, but not 100% accurate. A linear model in this case might not yield good accuracy. We need to run various experiments - try new variables, try new models, etc. to fine tune our model. 
 - With the **limited amount** of data, we cannot do provide justifications to the causes of these crimes. It could be late night street fights, drug abuse, etc. It could be related to unemployment and theft. Government should investigate the root cause of crime in the key precincts. 
+
+##### Actionable plan
+- The crime rate in NYC can be reduced by more than 1/2 if NYPD can partner with other Government and private agencies to improve the quality of life in the **Top five precincts in each BORO** shared in [section 3F](#section-3F).
 - We **recommend** that Law Enforcement should deploy more cops in the high-risk region that was highlighted in the report for the safety of the public during night hours. The public should be extra careful during the high-risk hours.
 
   
@@ -976,3 +1102,10 @@ To overcome implicit biases, we need to thoroughly analyze the data and our repo
 
 ----------------------------------------------
 
+
+##### Session Information
+```{r sessioninfo}
+sessionInfo()
+```
+
+ 
