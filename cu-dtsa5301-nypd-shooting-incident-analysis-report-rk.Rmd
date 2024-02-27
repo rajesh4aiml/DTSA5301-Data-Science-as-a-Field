@@ -6,7 +6,7 @@ output: pdf_document
 ---
 
 ##### **Important Note**
-- **Libraries Required**: Please plan to install the libraries **(ltidyverse, llubridate, lusmap, lstringr)**
+- **Libraries Required**: Please check session info in the end and confirm if you installed the libraries needed for this project. Important libraries: **(tidyverse, lubridate, usmap, stringr)**.
 - **File Downloads**: If you happen to run into data file download issues due to network issues, please retry, if not please manually download the file and save it to folder: cached_data under your current directory.
 - **PDF Document**: A PDF version of this report is available in [GitHub](https://github.com/rajesh4aiml/DTSA5301-Data-Science-as-a-Field).
 
@@ -40,7 +40,7 @@ This project is to analyze the **NYPD Shooting Incident data** and explore the n
 - For those who want a summarized view of this report, please start from **[Section 3: Visualizations](#Section 3: Visualizations)**. The observations and insights are articulated in that section. 
   
 
-##### **Data Science Process - An iterative approach**. Reference:*DTSA-530 by Prof. Jane Wall)*
+##### **Data Science Process - An iterative approach**. Reference:*DTSA-530 by Prof. Jane Wall*.
 - We will follow a well-defined process that we learned in DTSA-5301 for doing our analysis. During this process we will document our observations and share insights that will help the team and the key stakeholders.
 - **Import data** from [catalog.data.gov](https://data.cityofnewyork.us/api/views/833y-fsy8/rows.csv?accessType=DOWNLOAD)
 - **Tidy data** by removing unwanted rows, then formatting the data so that each row is an observation and finally null imputation or null value replacements.
@@ -74,9 +74,10 @@ formatNumber <- function(x) {
 }
 
 # Tidy dataset: Remove unwanted columns - select only the columns needed for analysis.
+### removed "INCIDENT_KEY", "JURISDICTION_CODE", "LOC_CLASSFCTN_DESC", "LOC_OF_OCCUR_DESC",
 tdRemoveCols <- function(ds_nyc_sh) {
-  cols <- c("INCIDENT_KEY", "OCCUR_DATE", "OCCUR_TIME", "BORO", "LOC_OF_OCCUR_DESC", "PRECINCT", "JURISDICTION_CODE", "LOC_CLASSFCTN_DESC", "LOCATION_DESC", "STATISTICAL_MURDER_FLAG", "PERP_AGE_GROUP", "PERP_SEX", "PERP_RACE", "VIC_AGE_GROUP", "VIC_SEX", "VIC_RACE")
-  result <- ds_nyc_sh %>% select(all_of(cols))
+  required_cols <- c("OCCUR_DATE", "OCCUR_TIME", "BORO", "PRECINCT", "LOCATION_DESC", "STATISTICAL_MURDER_FLAG", "PERP_AGE_GROUP", "PERP_SEX", "PERP_RACE", "VIC_AGE_GROUP", "VIC_SEX", "VIC_RACE")
+  result <- ds_nyc_sh %>% select(all_of(required_cols))
   result
 }
 
@@ -138,16 +139,15 @@ tdAugmentDates <- function(df_nyc_sh) {
 # In our use case, here are all columns that need to be transformed to categorical. 
 tdChangeColTypesForCategoricalCols <- function(ds_nyc_sh) {
   ds_nyc_sh$BORO = as.factor(ds_nyc_sh$BORO)
-  # replace PERP_AGE_GROUP with factors
   ds_nyc_sh$PERP_AGE_GROUP = as.factor(ds_nyc_sh$PERP_AGE_GROUP)
   ds_nyc_sh$PRECINCT = as.factor(ds_nyc_sh$PRECINCT)
-  
   ds_nyc_sh$PERP_AGE_GROUP = as.factor(ds_nyc_sh$PERP_AGE_GROUP)
   ds_nyc_sh$VIC_AGE_GROUP = as.factor(ds_nyc_sh$VIC_AGE_GROUP)
   ds_nyc_sh$PERP_SEX = as.factor(ds_nyc_sh$PERP_SEX)
   ds_nyc_sh$VIC_SEX = as.factor(ds_nyc_sh$VIC_SEX)
   ds_nyc_sh$PERP_RACE = as.factor(ds_nyc_sh$PERP_RACE)
   ds_nyc_sh$VIC_RACE = as.factor(ds_nyc_sh$VIC_RACE)
+  ds_nyc_sh$LOCATION_DESC = as.factor(ds_nyc_sh$LOCATION_DESC)
   ds_nyc_sh
 }
 
@@ -341,13 +341,20 @@ nyc_incidents_by_loc_df <- nyc_incidents_by_loc_df %>%
   mutate(LOCATION_DESC = reorder(LOCATION_DESC, -inc_ct)) %>%
   ungroup()
 
-# Prepare the graph for location display
-nyc_incidents_by_loc_vz <- nyc_incidents_by_loc_df  %>%
+# Prepare the pie chart graph for location display
+## define color for locations, overwrite the first color
+loca_cols <- c("azure", rainbow(15))
+nyc_incidents_by_loc_pie_chart_vz <- nyc_incidents_by_loc_df  %>%
   ggplot(aes(x="", y=inc_ct, fill=LOCATION_DESC)) + 
   geom_bar(stat="identity", width=1)  + 
   coord_polar("y", start=0) + 
   xlab("") + ylab("") + 
+  scale_fill_manual(values=loca_cols) +
   theme_light() +
+  theme(
+    legend.text = element_text(size = 6), # shrink legend size
+    axis.text.x = element_text(size=0.1) # hide lables
+  ) +
   ggtitle(str_c("S-Inc by Location. Total incidents:", total_no_of_incidents)) +
   theme(legend.direction="vertical")
 
@@ -526,7 +533,6 @@ nyc_incidents_by_vic_age_group_ts_vz <- nyc_incidents_by_vic_age_group_df %>%
     title = str_c("S-Inc by Victims age group. Total incidents:", total_no_of_incidents)
   )
 
-
 ```
 
 
@@ -564,14 +570,18 @@ nyc_incidents_by_perp_age_group_race_ts_vz <- nyc_incidents_by_perp_age_group_ra
   theme_light() +
   theme(
     strip.background = element_rect(fill = "peachpuff"),
-    strip.text = element_text(colour = "navy", size = rel(1.0)),
+    #strip.text = element_text(colour = "navy", size = rel(1.0)),
+    strip.text = element_text(colour = "navy", size = 5), # shrink size of facet header
     plot.title = element_text(hjust = 0.5),
-    plot.subtitle = element_text(hjust = 0.97),
-    axis.text.x = element_text(angle = 45, hjust = 1)
+    plot.subtitle = element_text(hjust = 0.97, size = 5),
+    axis.text.x = element_text(angle = 60, hjust = 1),
+    legend.text = element_text(size = 5) # shrink legend size
+    #legend.position = "top",
+    #legend.direction="horizontal",
   ) + 
   xlab("Perpetrator age group and race") + ylab("Incident Count") +
   labs(
-    title = str_c("S-Inc by Perpetrator age group and race. \nTotal incidents:", total_no_of_incidents)
+    title = str_c("S-Inc by Perpetrator age group and race. Total incidents:", total_no_of_incidents)
   )
 
 
@@ -605,14 +615,19 @@ nyc_incidents_by_vic_age_group_race_ts_vz <- nyc_incidents_by_vic_age_group_race
   theme_light() +
   theme(
     strip.background = element_rect(fill = "peachpuff"),
-    strip.text = element_text(colour = "navy", size = rel(1.0)),
+    #strip.text = element_text(colour = "navy", size = rel(1.0)),
+    strip.text = element_text(colour = "navy", size = 5), # shrink size of facet header
     plot.title = element_text(hjust = 0.5),
-    plot.subtitle = element_text(hjust = 0.97),
-    axis.text.x = element_text(angle = 45, hjust = 1)
+    plot.subtitle = element_text(hjust = 0.97, size = 5),
+    axis.text.x = element_text(angle = 60, hjust = 1),
+    legend.text = element_text(size = 5) # shrink legend size
+    #legend.position = "top",
+    #legend.direction="horizontal",
+    
   ) + 
   xlab("Victims age group and race") + ylab("Incident Count") +
   labs(
-    title = str_c("S-Inc by Victims age group and race. \nTotal incidents:", total_no_of_incidents)
+    title = str_c("S-Inc by Victims age group and race. Total incidents:", total_no_of_incidents)
   )
 
 ```
@@ -843,6 +858,18 @@ nyc_dataset_brooklyn_vz <- ggplot(nyc_dataset_brooklyn_df, aes(x=PRECINCT, y=ct)
 
 ```
 
+----------------------------------------------
+
+##### **Section 2B: Summarize the Tidy dataset**: nyc_dataset_df. Rinse and repeat tidy-analyze steps until the data is in good order.
+- Is our dataset in good order? Is the tidy completed? 
+- Do we have all the columns that we need and are the columns in the right format?
+- Note: *More than 70%" of the time is spent in getting the data in right order.
+```{r vz-nyc-prereq, message=FALSE}
+sm_cols <- c("OCCUR_DATE", "BORO", "PRECINCT", "LOCATION_DESC", "STATISTICAL_MURDER_FLAG", "PERP_AGE_GROUP", "PERP_SEX", "PERP_RACE", "VIC_AGE_GROUP", "VIC_SEX", "VIC_RACE")
+
+summary(nyc_dataset_df %>% select(sm_cols))
+
+```
 
 ----------------------------------------------
 
@@ -878,7 +905,7 @@ nyc_incidents_ts_vz
   * We can also ask Government to put more law enforcement surveillance in the top 3 areas. 
 
 ```{r vz-nyc-inc-by-loc-1, message=FALSE, echo=FALSE}
-nyc_incidents_by_loc_vz
+nyc_incidents_by_loc_pie_chart_vz
 
 ```
 
@@ -1058,6 +1085,13 @@ summary(nyc_ct_by_year_mdl$coefficients)
 ```{r mdl-nyc-inc-vz-mdl2, message=FALSE, echo=FALSE}
 nyc_ct_by_year_pred_vz
 ```
+
+
+----------------------------------------------
+
+
+# **Section 5: Biases - How to overcome?**
+
 ----------------------------------------------
 
 ##### **Section 5A: Bias Identification & Elimination**: 
@@ -1068,33 +1102,52 @@ While looking at the initial data I might have some implicit bias such as stereo
 
 A **stereotype** is a generalized belief about a particular category of people. It is an expectation that people might have about every person of a particular group. The type of expectation can vary; it can be, for example, an expectation about the group's personality, preferences, appearance or ability. Stereotypes are sometimes overgeneralized, inaccurate, and resistant to new information, but can sometimes be accurate.
 
+For example, when I drive around these Boro's in NYC, I see homeless people and mostly Black. Is it by their faith? or is it by their karma? Have I heard about a race involved in an incident in my friend circle? **Should I have any judgement about these people?** - **Well, no**, they are humans. I should be practical and do everything for my safety, but I should not categorize a person without knowing the details. **Data is gold** - Always use data to make inferences.
+
+**Correlation does not imply causation**: Are guns the root cause of the issues in general? - Everyone who has a gun will not commit crime, and every crime that resulted in death was not related to guns - Stabbing, Hitting with objects, etc. Will this report or similar report change my belief on people of certain race and age group? Did the murder occur while defending?
+
+These are very **Hard to answer** questions without the supporting data, however, this report is related to shooting incidents in NYC, so we know the cause, but we do not know the circumstances. 
+
 There are other biases that could be introduced while working on this case study:
-  - Emotional bias:  due to the nature of crime
-  - Selection bias: Who and how the data was collected.
-  - Anchoring bias: We react to the first piece of information.
-  - Confirmation bias: We might think we are experts.
-  - Salience - Focusing on the simple things to get work done.
+
+**Emotional bias**:  Depends on the nature of our understanding of the incident. For e.g. **Scenario-1:** Someone did a mass shooting in public. **Scenario-2:** Some women in our friend circle was attacked at night when there were no cops around. Do we think that the victim could have defended herself with a gun? **Our position** will change based on the **circumstances** because of our emotions.
+
+**Selection biases**: Quality of information - Who and how the data was collected?
+
+**Anchoring biases**: We react to the first piece of information.
+
+**Confirmation biases**: We might think that we are experts.
+  
+**Salience biases**: Focusing on the simple things to get work done.
 
 **Biases - How to overcome**:
-To overcome implicit biases, we need to follow a disciplined and mindful approach of thoroughly analyzing the data, drawing inferences, asking questions, collecting more data and validating our assumptions using some quantitative models. Our report must be based on facts in the data and not based on our emotions and biases.
+To overcome implicit biases, we need to follow a disciplined and mindful approach of thoroughly analyzing the data, drawing inferences from data, asking questions, collecting more data and validating our assumptions using some quantitative models. 
+
+Our report must be based on facts in the data and not based on our emotions and biases.
+
 
 ----------------------------------------------
 
 
-##### **Section 5B: Conclusion**: 
+# **Section 6: Conclusion**
+
+----------------------------------------------
+
+##### **NYPD Shooting Incident Report**: 
 - After downloading and cleaning up the data for NYPD shooting, we went through and iterative Data science process of Asking questions, preparing data, analyzing, visualizing the data and drawing conclusions. We eliminated the Biases - stereotype, emotional and other biases - by gleaning valuable information from the data to make inferences. 
 - We reported our observations at each step. Our key observations were:
   * Between **2005** and **2020**, there were **`r total_no_of_incidents`** shooting incidents in the **five** Boro's and **Brooklyn 40%** and **Bronx** were the areas with most crimes. **Approx. 17% to 20%** of the incidents resulted in a murder. We also noticed that the incident was concentrated in few Precincts within these Boro's.  
-  * The incidents mostly occurred in the multi-dwell, apt, grocery, bar/night club, and commercial buildings during the night and the midnight hours and mostly men were involved in crime.
+  * The incidents mostly occurred in the multi-dwell, apt, grocery, bar/night club, and commercial buildings during the **night** and the **midnight** hours and mostly **men** were involved in crime.
   * The race, sex and age-group of most of the perpetrators were - Black Male between **ages 18 to 44** years. The race, sex and age-group of most of the victims were - Black and Black Hispanic and white Hispanic male between **ages 18 to 44** years. 
-  * The top 5 precincts in each Boro accounted for 60% of the incidents.
-  * The top 10 precincts in Brooklyn resulted in a crime rate of **`r bk_top10_global_pct`** of the NYC shootings. These precincts: **`r top10_precinct`** had total **`r formatNumber(bk_top10_share)`** shooting incidents and hence they really need attention. 
-- We built a model to predict the shootings in each Boro for the future. We noticed that our model is good, but not 100% accurate. A linear model in this case might not yield good accuracy. We need to run various experiments - try new variables, try new models, etc. to fine tune our model. 
-- With the **limited amount** of data, we cannot do provide justifications to the causes of these crimes. It could be late night street fights, drug abuse, etc. It could be related to unemployment and theft. Government should investigate the root cause of crime in the key precincts. 
+  * The top 5 precincts in each Boro accounted for **60% of the incidents**.
+  * The top 10 precincts in Brooklyn resulted in a crime rate of **`r bk_top10_global_pct`** of the entire NYC shootings. These precincts: **`r top10_precinct`** had total **`r formatNumber(bk_top10_share)`** shooting incidents and hence they really need attention. 
+- We built a **basic model** to **predict/forecast** the future shootings in each Boro. We noticed that our model is good, but not 100% accurate. A linear model in this case might not yield good accuracy. We need to run various experiments - try new variables, try new models, etc. to fine tune our model. 
+- With the **limited amount** of data, we cannot provide justifications to the causes of these crimes. It could be late night street fights, drug abuse, etc. It could be related to unemployment and theft. 
+- **Government and Law enforcement agencies** should review this report and **take actions to reduce crime** in the **key precincts** in NYC. 
 
-##### Actionable plan
-- The crime rate in NYC can be reduced by more than 1/2 if NYPD can partner with other Government and private agencies to improve the quality of life in the **Top five precincts in each BORO** shared in [section 3F](#section-3F).
-- We **recommend** that Law Enforcement should deploy more cops in the high-risk region that was highlighted in the report for the safety of the public during night hours. The public should be extra careful during the high-risk hours.
+##### **Actionable plan** - What are the next steps?
+- The crime rate in NYC can be reduced by **more than half** if NYPD and Law enforcement agencies can partner with other Government and private agencies to improve the quality of life in the **Top five precincts in each BORO** shared in [section 3F](#section-3F).
+- We **recommend** that Law Enforcement should deploy more cops in the high-risk region that was highlighted in the report for the safety of the public especially during night hours. The public should be extra careful during the high-risk days and hours.
 
   
   
@@ -1102,8 +1155,8 @@ To overcome implicit biases, we need to follow a disciplined and mindful approac
 
 ----------------------------------------------
 
-
-##### Session Information
+###### **Section 7: ** Session Information
+- This will help the reader to understand the packages used.
 ```{r sessioninfo}
 sessionInfo()
 ```
